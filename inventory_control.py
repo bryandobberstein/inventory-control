@@ -10,23 +10,23 @@ app.secret_key = "JinUdceer0"
 
 db = SQLAlchemy(app)
 
-class Category(db.model):
+class Category(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30))
-    item = db.Relationship("Item", backref = "category". lazy = "dynamic")
+    item = db.relationship("Item", backref = "category", lazy = "dynamic")
 
     def __init__(self, name):
         self.name = name
 
-class Item(db.model):
+class Item(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30))
     description = db.Column(db.Text)
-    serial_number = db.Column(db.string(50))
+    serial_number = db.Column(db.String(50))
     sku = db.Column(db.String(50))
     price = db.Column(db.Float)
     location = db.Column(db.Text)
-    category_id = db.Column(db.Integer, db.Foreignkey("category.id"))
+    category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
 
     def __init__(self, name, description, sku, price, location, serial_number = "NA"):
         self.name = name
@@ -35,6 +35,10 @@ class Item(db.model):
         self.price = price
         self.location = location
         self.serial_number = serial_number
+
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run()
