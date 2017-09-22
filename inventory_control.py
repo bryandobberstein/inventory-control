@@ -1,8 +1,9 @@
 from flask import Flask, request, redirect, render_template, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import InputRequired
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
+from wtforms import StringField, PasswordField, TextField, BooleanField, SubmitField
+from wtforms.validators import InputRequired, Length
 from werkzeug import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -12,6 +13,8 @@ app.config["SQLALCHEMY_ECHO"] = True
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "JinUdceer0"
 
+lm = LoginManager(app)
+lm.login_view = "login?????"
 db = SQLAlchemy(app)
 
 class Category(db.Model):
@@ -39,6 +42,25 @@ class Item(db.Model):
         self.price = price
         self.location = location
         self.serial_number = serial_number
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.String(20), index = True, unique = True)
+    pwhash = db.Column(db.String(64))
+
+    def set_pwhash(self, password):
+        self.pwhash = generate_password_hash(password, method="sha512", salt_length = 10)
+
+    def verify_pwhash(self.pwhash, password):
+        return check_password_hash(self.pwhash, password)
+
+    @staticmethod
+    def register(username, password):
+        user = User(username = username)
+        user.set_pwhash(password)
+        db.session.add(user)
+        db.session.commit()
+        return user
 
 class TestForm(FlaskForm):
     name = StringField("Name", validators = [InputRequired(message = "Name required")])
