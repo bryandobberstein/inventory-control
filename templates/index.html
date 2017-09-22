@@ -1,9 +1,15 @@
 <!DOCTYPE html>
+{% from "_macros.html" import render_field %}
 <html>
   <head>
     <title>Index Placeholder</title>
   </head>
   <body>
-    <h1>Placeholder</h1>
+    <h1>{{ greeting }}</h1>
+    <form method="post">
+      {{ form.csrf_token }}
+      {{ render_field(form.name) }}
+      <br>{{ form.submit }}
+    </form>
   </body>
 </html>
