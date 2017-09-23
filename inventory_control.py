@@ -4,7 +4,7 @@ from flask_wtf import FlaskForm
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 from flask_bootstrap import Bootstrap
 from wtforms import StringField, PasswordField, TextField, BooleanField, SubmitField
-from wtforms.validators import InputRequired, Length
+from wtforms.validators import InputRequired, Length, EqualTo
 from werkzeug import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -78,6 +78,12 @@ class LoginForm:
     remember_me = BooleanField("Remember Me")
     submit = SubmitField("Log In")
 
+class RegisterForm:
+    username = StringField("Username", validators = [InputRequired()], Length(min = 6, max = 20))
+    password = PasswordField("Password", validators = [InputRequired(), Length(min = 8, max = 20)]
+    verify = PasswordField("Verify Password", validators = [InputRequired(), EqualTo(password)])
+    submit = SubmitField("Register")
+
 @app.route("/", methods = ["GET", "POST"])
 def index():
     form = TestForm()
@@ -87,21 +93,29 @@ def index():
     if request.method == "POST":
         if form.validate_on_submit():
             name = form.name.data
-            hashed_name = generate_password_hash(name, method="sha256", salt_length = 10)
-            check = check_password_hash(hashed_name, name)
             greeting = "Hello, {}".format(name)
     return render_template("index.html", form = form, greeting = greeting, title = "Inventory Control")
 
 @app.route("/login", methods = ["GET", "POST"])
-def login():
+def login_page():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username = form.username.data).first()
         if user is None or not user.verify_pwhash(form.password.data):
             return redirect(url_for("login"))
         login_user(user, form.remember_me.data)
-        return redirect(request.args.get("next") or url_for("index"))
+        return redirect(request.args.get("next") or url_for("search"))
     return render_template("login.html", form = form)
+
+@app.route("/register", methods = ["GET", "POST")
+def register_page():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        User.register(username, password)
+        return render_template("inventory-search.html")
+
 
 if __name__ == "__main__":
     app.run()
