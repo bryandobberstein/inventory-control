@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, render_template, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
+from flask_bootstrap import Bootstrap
 from wtforms import StringField, PasswordField, TextField, BooleanField, SubmitField
 from wtforms.validators import InputRequired, Length
 from werkzeug import generate_password_hash, check_password_hash
@@ -14,7 +15,8 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "JinUdceer0"
 
 lm = LoginManager(app)
-lm.login_view = "login?????"
+lm.login_view = "login"
+bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
 
 class Category(db.Model):
@@ -35,23 +37,23 @@ class Item(db.Model):
     location = db.Column(db.Text)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
 
-    def __init__(self, name, description, sku, price, location, serial_number = "NA"):
+    def __init__(self, name, description, sku, serial_number, price, location, category):
         self.name = name
         self.description = description
         self.sku = sku
         self.price = price
         self.location = location
         self.serial_number = serial_number
+        self.category = category
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(20), index = True, unique = True)
-    pwhash = db.Column(db.String(64))
+    pwhash = db.Column(db.String(90))
 
     def set_pwhash(self, password):
-        self.pwhash = generate_password_hash(password, method="sha512", salt_length = 10)
-
-    def verify_pwhash(self.pwhash, password):
+        self.pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
+    def verify_pwhash(self, password):
         return check_password_hash(self.pwhash, password)
 
     @staticmethod
@@ -62,24 +64,44 @@ class User(UserMixin, db.Model):
         db.session.commit()
         return user
 
+@lm.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
 class TestForm(FlaskForm):
-    name = StringField("Name", validators = [InputRequired(message = "Name required")])
+    name = StringField("Name", validators = [InputRequired(message = "Please enter a name")])
     submit = SubmitField("Enter")
+
+class LoginForm:
+    username = StringField("Username", validators = [InputRequired()])
+    password = PasswordField("Password", validators = [InputRequired()])
+    remember_me = BooleanField("Remember Me")
+    submit = SubmitField("Log In")
 
 @app.route("/", methods = ["GET", "POST"])
 def index():
     form = TestForm()
     name = ""
+    error = ""
     greeting = "Enter Your Name"
     if request.method == "POST":
         if form.validate_on_submit():
             name = form.name.data
-            hashed_name = generate_password_hash(name, method="sha512", salt_length = 10)
+            hashed_name = generate_password_hash(name, method="sha256", salt_length = 10)
             check = check_password_hash(hashed_name, name)
-            greeting = "Hello, {}. {}. {}".format(name, hashed_name, check)
-        else:
-            greeting = "NOTHING ENTERED"
-    return render_template("index.html", form = form, greeting = greeting)
+            greeting = "Hello, {}".format(name)
+    return render_template("index.html", form = form, greeting = greeting, title = "Inventory Control")
+
+@app.route("/login", methods = ["GET", "POST"])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username = form.username.data).first()
+        if user is None or not user.verify_pwhash(form.password.data):
+            return redirect(url_for("login"))
+        login_user(user, form.remember_me.data)
+        return redirect(request.args.get("next") or url_for("index"))
+    return render_template("login.html", form = form)
 
 if __name__ == "__main__":
     app.run()

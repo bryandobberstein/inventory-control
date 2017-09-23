@@ -1,15 +1,17 @@
-<!DOCTYPE html>
-{% from "_macros.html" import render_field %}
-<html>
-  <head>
-    <title>Index Placeholder</title>
-  </head>
-  <body>
+{% import "bootstrap/wtf.html" as wtf %}
+{% extends "bootstrap/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block navbar %}
+  <nav class = "navbar navbar-inverse">
+    <div class = "container">
+      <a class = "navbar-brand" href = "{{ url_for("index")}}">Inventory Control</a>
+    </div>
+  </nav>
+{% endblock %}
+
+{% block  content %}
+  <div class = "container">
     <h1>{{ greeting }}</h1>
-    <form method="post">
-      {{ form.csrf_token }}
-      {{ render_field(form.name) }}
-      <br>{{ form.submit }}
-    </form>
-  </body>
-</html>
+    {{ wtf.quick_form(form) }}
+  </div>
+{% endblock %}
