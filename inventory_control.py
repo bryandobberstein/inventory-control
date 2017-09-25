@@ -72,15 +72,15 @@ class TestForm(FlaskForm):
     name = StringField("Name", validators = [InputRequired(message = "Please enter a name")])
     submit = SubmitField("Enter")
 
-class LoginForm:
+class LoginForm(FlaskForm):
     username = StringField("Username", validators = [InputRequired()])
     password = PasswordField("Password", validators = [InputRequired()])
     remember_me = BooleanField("Remember Me")
     submit = SubmitField("Log In")
 
-class RegisterForm:
-    username = StringField("Username", validators = [InputRequired()], Length(min = 6, max = 20))
-    password = PasswordField("Password", validators = [InputRequired(), Length(min = 8, max = 20)]
+class RegisterForm(FlaskForm):
+    username = StringField("Username", validators = [InputRequired(), Length(6, 20)])
+    password = PasswordField("Password", validators = [InputRequired(), Length(8, 20)])
     verify = PasswordField("Verify Password", validators = [InputRequired(), EqualTo(password)])
     submit = SubmitField("Register")
 
@@ -107,7 +107,7 @@ def login_page():
         return redirect(request.args.get("next") or url_for("search"))
     return render_template("login.html", form = form)
 
-@app.route("/register", methods = ["GET", "POST")
+@app.route("/register", methods = ["GET", "POST"])
 def register_page():
     form = RegisterForm()
     if form.validate_on_submit():
@@ -115,6 +115,27 @@ def register_page():
         password = form.password.data
         User.register(username, password)
         return render_template("inventory-search.html")
+
+@app.route("/search", methods = ["GET", "POST"])
+def search():
+    form = SearchForm()
+
+    if form.validate_on_submit():
+        if type and category:
+            type = form.type.data
+            category = form.category.data
+            term = form.term.data
+            items = Item.type.query.join(Category.query.filter_by(category).filter(Item.name.in_(term))).all()
+        elif type:
+            type = form.type.data
+            term = form.term.data
+            items = Item.type.query.filter(Item.name.in_(term)).all()
+        elif category:
+            category = form.category.data
+            term = form.term.data
+            items = Item.query.join(Category.query.filter_by(category).filter(Item.name.in_(term))).all()
+        else:
+            items = Item.query.query.filter(Item.name.in_(term)).all
 
 
 if __name__ == "__main__":
