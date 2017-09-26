@@ -116,6 +116,7 @@ def register_page():
         User.register(username, password)
         return render_template("inventory-search.html")
 
+#TODO
 @app.route("/search", methods = ["GET", "POST"])
 def search():
     form = SearchForm()
@@ -125,17 +126,18 @@ def search():
             type = form.type.data
             category = form.category.data
             term = form.term.data
-            items = Item.type.query.join(Category.query.filter_by(category).filter(Item.name.in_(term))).all()
+            #Table.column.contains()
+            items = Item.query.join(Category.query.filter_by(category).filter(Item.type.contains(term))).all()
         elif type:
             type = form.type.data
             term = form.term.data
-            items = Item.type.query.filter(Item.name.in_(term)).all()
+            items = Item.type.query.filter(Item.type.contains(term)).all()
         elif category:
             category = form.category.data
             term = form.term.data
-            items = Item.query.join(Category.query.filter_by(category).filter(Item.name.in_(term))).all()
+            items = Item.query.join(Category.query.filter_by(category).filter(Item.description.contains(term))).all()
         else:
-            items = Item.query.query.filter(Item.name.in_(term)).all
+            items = Item.query.query.filter(Item.description.contains(term)).all()
 
 
 if __name__ == "__main__":
