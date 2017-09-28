@@ -31,19 +31,17 @@ class Item(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30))
     description = db.Column(db.Text)
-    serial_number = db.Column(db.String(50))
-    sku = db.Column(db.String(50))
+    isbn = db.Column(db.String(15))
     price = db.Column(db.Float)
     location = db.Column(db.Text)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
 
-    def __init__(self, name, description, sku, serial_number, price, location, category):
+    def __init__(self, name, description, isbn, price, location, category):
         self.name = name
         self.description = description
-        self.sku = sku
         self.price = price
         self.location = location
-        self.serial_number = serial_number
+        self.isbn = isbn
         self.category = category
 
 class User(UserMixin, db.Model):
@@ -122,17 +120,7 @@ def search():
     form = SearchForm()
 
     if form.validate_on_submit():
-        if type and category:
-            type = form.type.data
-            category = form.category.data
-            term = form.term.data
-            #Table.column.contains()
-            items = Item.query.join(Category.query.filter_by(category).filter(Item.type.contains(term))).all()
-        elif type:
-            type = form.type.data
-            term = form.term.data
-            items = Item.type.query.filter(Item.type.contains(term)).all()
-        elif category:
+        if category:
             category = form.category.data
             term = form.term.data
             items = Item.query.join(Category.query.filter_by(category).filter(Item.description.contains(term))).all()
