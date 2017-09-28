@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 from flask_bootstrap import Bootstrap
-from wtforms import StringField, PasswordField, TextField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, TextField, IntegerField, FloatField, BooleanField, SubmitField
 from wtforms.validators import InputRequired, Length, EqualTo
 from werkzeug import generate_password_hash, check_password_hash
 
@@ -19,30 +19,22 @@ lm.login_view = "login"
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
 
-class Category(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(30))
-    item = db.relationship("Item", backref = "category", lazy = "dynamic")
-
-    def __init__(self, name):
-        self.name = name
-
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30))
     description = db.Column(db.Text)
     isbn = db.Column(db.String(15))
     price = db.Column(db.Float)
+    in_stock = db.Column(db.Integer)
     location = db.Column(db.Text)
-    category_id = db.Column(db.Integer, db.ForeignKey("category.id"))
 
-    def __init__(self, name, description, isbn, price, location, category):
+    def __init__(self, name, description, isbn, price, in_stock, location):
         self.name = name
         self.description = description
-        self.price = price
-        self.location = location
         self.isbn = isbn
-        self.category = category
+        self.price = price
+        self.in_stock = in_stock
+        self.location = location
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -82,6 +74,14 @@ class RegisterForm(FlaskForm):
     verify = PasswordField("Verify Password", validators = [InputRequired(), EqualTo(password)])
     submit = SubmitField("Register")
 
+class AddItemForm(FlaskForm):
+    name = StringField("Item name", validators = [InputRequired()])
+    description = TextField("Description", validators = [InputRequired()])
+    isbn = isbn = IntegerField("ISBN", validators = [InputRequired()])
+    price = FloatField("Price", validators = [InputRequired()])
+    in_stock = IntegerField("# in stock", validators = [InputRequired()])
+    location = TextField("Location", validators = [InputRequired()])
+
 @app.route("/", methods = ["GET", "POST"])
 def index():
     form = TestForm()
@@ -114,18 +114,48 @@ def register_page():
         User.register(username, password)
         return render_template("inventory-search.html")
 
-#TODO
+#TODO (templates)
 @app.route("/search", methods = ["GET", "POST"])
 def search():
     form = SearchForm()
 
     if form.validate_on_submit():
-        if category:
+        if form.category.data:
             category = form.category.data
             term = form.term.data
-            items = Item.query.join(Category.query.filter_by(category).filter(Item.description.contains(term))).all()
-        else:
+            items = Item.query.filter(Item.category.contains(term))
+        else
+            term = form.term.data
             items = Item.query.query.filter(Item.description.contains(term)).all()
+        return render_template("results.html", items = items)
+    return render_template("search.html")
+
+#TODO (templates)
+@app.route("/new_item", methods = ["GET", "POST"])
+def new_item():
+    form = AddItemForm()
+
+    if form.validate_on_submit():
+        name = form.name.data
+        description = form.description.data
+        isbn = form.isbn.data
+        price = form.price.data
+        in_stock = form.in_stock.data
+        location = form.location.data
+
+        double_check = Item.query.filter_by(isbn = isbn)
+        if double_check:
+            return render_template("add.html", error = "That item already exists")
+        else:
+            item_to_add = Item(nme, description, isbn, price, in_stock, location)
+            db.session.add(item_to_add)
+            db.session.commit()
+            newid = item_to_add.id
+            new_item_id = Item.query.filter_by(id = id).first()
+            return render_template("new_item.html", new_item_id = new_item_id)
+
+    return render_template("add.html")
+
 
 
 if __name__ == "__main__":
