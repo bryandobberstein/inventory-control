@@ -1,11 +1,9 @@
 from flask import Flask, request, redirect, render_template, session
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf import FlaskForm
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
 from flask_bootstrap import Bootstrap
-from wtforms import StringField, PasswordField, TextField, IntegerField, FloatField, BooleanField, SubmitField
-from wtforms.validators import InputRequired, Length, EqualTo
 from werkzeug import generate_password_hash, check_password_hash
+from forms import TestForm, LoginForm, RegisterForm, AddItemForm
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
@@ -21,15 +19,17 @@ db = SQLAlchemy(app)
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(30))
+    title = db.Column(db.String(30))
+    author = db.Column(db.String(30))
     description = db.Column(db.Text)
     isbn = db.Column(db.String(15))
     price = db.Column(db.Float)
     in_stock = db.Column(db.Integer)
     location = db.Column(db.Text)
 
-    def __init__(self, name, description, isbn, price, in_stock, location):
-        self.name = name
+    def __init__(self, title, author, description, isbn, price, in_stock, location):
+        self.title = title
+        self.author = author
         self.description = description
         self.isbn = isbn
         self.price = price
@@ -57,30 +57,6 @@ class User(UserMixin, db.Model):
 @lm.user_loader
 def load_user(id):
     return User.query.get(int(id))
-
-class TestForm(FlaskForm):
-    name = StringField("Name", validators = [InputRequired(message = "Please enter a name")])
-    submit = SubmitField("Enter")
-
-class LoginForm(FlaskForm):
-    username = StringField("Username", validators = [InputRequired()])
-    password = PasswordField("Password", validators = [InputRequired()])
-    remember_me = BooleanField("Remember Me")
-    submit = SubmitField("Log In")
-
-class RegisterForm(FlaskForm):
-    username = StringField("Username", validators = [InputRequired(), Length(6, 20)])
-    password = PasswordField("Password", validators = [InputRequired(), Length(8, 20)])
-    verify = PasswordField("Verify Password", validators = [InputRequired(), EqualTo(password)])
-    submit = SubmitField("Register")
-
-class AddItemForm(FlaskForm):
-    name = StringField("Item name", validators = [InputRequired()])
-    description = TextField("Description", validators = [InputRequired()])
-    isbn = isbn = IntegerField("ISBN", validators = [InputRequired()])
-    price = FloatField("Price", validators = [InputRequired()])
-    in_stock = IntegerField("# in stock", validators = [InputRequired()])
-    location = TextField("Location", validators = [InputRequired()])
 
 @app.route("/", methods = ["GET", "POST"])
 def index():
@@ -124,7 +100,7 @@ def search():
             category = form.category.data
             term = form.term.data
             items = Item.query.filter(Item.category.contains(term))
-        else
+        else:
             term = form.term.data
             items = Item.query.query.filter(Item.description.contains(term)).all()
         return render_template("results.html", items = items)
@@ -136,7 +112,8 @@ def new_item():
     form = AddItemForm()
 
     if form.validate_on_submit():
-        name = form.name.data
+        title = form.title.data
+        author = form.author.data
         description = form.description.data
         isbn = form.isbn.data
         price = form.price.data
@@ -147,7 +124,7 @@ def new_item():
         if double_check:
             return render_template("add.html", error = "That item already exists")
         else:
-            item_to_add = Item(nme, description, isbn, price, in_stock, location)
+            item_to_add = Item(title,author, description, isbn, price, in_stock, location)
             db.session.add(item_to_add)
             db.session.commit()
             newid = item_to_add.id
