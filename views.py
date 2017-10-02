@@ -1,6 +1,6 @@
 from flask import request, redirect, render_template, session
 from inventory_control import app
-from forms import TestForm, LoginForm, RegisterForm, AddItemForm
+from forms import *
 
 @app.route("/", methods = ["GET", "POST"])
 def index():
