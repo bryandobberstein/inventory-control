@@ -17,7 +17,7 @@ def index():
     return render_template("index.html", form = form, greeting = greeting, title = "Inventory Control")
 
 @app.route("/login", methods = ["GET", "POST"])
-def login_page():
+def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username = form.username.data).first()
@@ -29,7 +29,7 @@ def login_page():
     return render_template("login.html", form = form)
 
 @app.route("/register", methods = ["GET", "POST"])
-def register_page():
+def register():
     form = RegisterForm()
     search_form = SearchForm()
     if form.validate_on_submit():
@@ -83,4 +83,4 @@ def new_item():
             new_item_id = Item.query.filter_by(id = id).first()
             return render_template("new_item.html", new_item_id = new_item_id)
 
-    return render_template("add.html")
+    return render_template("add.html", form = form)
