@@ -51,10 +51,10 @@ def search():
         if form.category.data:
             category = form.category.data
             term = form.term.data
-            items = Item.query.filter(Item.category.contains(term))
+            items = Item.query.filter(Item.category.contains(term)).all()
         else:
             term = form.term.data
-            items = Item.query.query.filter(Item.description.contains(term)).all()
+            items = Item.query.filter(Item.description.contains(term)).all()
         return render_template("results.html", items = items)
     return render_template("search.html", form = form)
 

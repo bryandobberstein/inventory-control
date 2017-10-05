@@ -3,6 +3,24 @@
 {% block  content %}
   <div class = "container">
     <h1>{{ greeting }}</h1>
-    {{ wtf.quick_form(form) }}
+      <table class="table table-bordered">
+        {% for item in items %}
+        <thead>
+          <tr class="bg-primary">
+            <th>Category</th>
+            <th>Item</th>
+          </tr>
+        </thead>
+        <tbody>
+         <tr><th scope="row">Title: </th><td>{{item.title}}</td></tr>
+         <tr><th scope="row">Author: </th><td>{{item.author}}</td></tr>
+         <tr><th scope="row">Description: </th><td>{{item.description}}</td></tr>
+         <tr><th scope="row">ISBN: </th><td>{{item.isbn}}</td></tr>
+         <tr><th scope="row">Price: </th><td>{{item.price}}</td></tr>
+         <tr><th scope="row">In Stock: </th><td>{{item.in_stock}}</td></tr>
+         <tr><th scope="row">Location: </th><td>{{item.location | safe}}</td></tr>
+       </tbody>
+        {% endfor %}
+    </table>
   </div>
 {% endblock %}

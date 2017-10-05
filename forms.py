@@ -26,6 +26,9 @@ class AddItemForm(FlaskForm):
     price = FloatField("Price", validators = [InputRequired()])
     in_stock = IntegerField("# in stock", validators = [InputRequired()])
     location = TextField("Location", validators = [InputRequired()])
+    submit = SubmitField("Add Item")
 
 class SearchForm(FlaskForm):
     term = StringField("Search")
+    category = StringField("Category")
+    submit = SubmitField("Find")
