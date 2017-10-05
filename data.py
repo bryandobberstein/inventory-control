@@ -21,3 +21,6 @@ if __name__ == "__main__":
     db.drop_all()
     db.create_all()
     load_data()
+    newuser = User("Admin", "password")
+    db.session.add(newuser)
+    db.session.commit()
