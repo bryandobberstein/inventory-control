@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-{% from "_macros.html" import render_field %}
+{% import "bootstrap/wtf.html" as wtf %}
 {% extends "bootstrap/base.html" %}
-<html>
-  <head>
-    <title>Index Placeholder</title>
-  </head>
-  <body>
-    {% block content %}
-    {% endblock %}
-  </body>
-</html>
+{% block title %}{{ title }}{% endblock %}
+{% block navbar %}
+  <nav class = "navbar navbar-inverse">
+    <div class = "container">
+      <a class = "navbar-brand" href = "{{ url_for("index")}}">Inventory Control</a>
+    </div>
+  </nav>
+{% endblock %}

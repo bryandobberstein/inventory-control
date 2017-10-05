@@ -14,8 +14,8 @@ class LoginForm(FlaskForm):
 
 class RegisterForm(FlaskForm):
     username = StringField("Username", validators = [InputRequired(), Length(6, 20)])
-    password = PasswordField("Password", validators = [InputRequired(), Length(8, 20)])
-    verify = PasswordField("Verify Password", validators = [InputRequired(), EqualTo(password)])
+    password = PasswordField("Password", validators = [InputRequired(), Length(6, 20)])
+    verify = PasswordField("Verify Password", validators = [InputRequired(), EqualTo("password")])
     submit = SubmitField("Register")
 
 class AddItemForm(FlaskForm):
@@ -26,3 +26,6 @@ class AddItemForm(FlaskForm):
     price = FloatField("Price", validators = [InputRequired()])
     in_stock = IntegerField("# in stock", validators = [InputRequired()])
     location = TextField("Location", validators = [InputRequired()])
+
+class SearchForm(FlaskForm):
+    term = StringField("Search")

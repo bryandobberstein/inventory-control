@@ -1,5 +1,4 @@
 from flask_login import UserMixin
-from werkzeug import generate_password_hash, check_password_hash
 from inventory_control import db
 
 class Item(db.Model):
@@ -26,15 +25,6 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(20), index = True, unique = True)
     pwhash = db.Column(db.String(90))
 
-    def set_pwhash(self, password):
-        self.pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
-    def verify_pwhash(self, password):
-        return check_password_hash(self.pwhash, password)
-
-    @staticmethod
-    def register(username, password):
-        user = User(username = username)
-        user.set_pwhash(password)
-        db.session.add(user)
-        db.session.commit()
-        return user
+    def __init__(self, username, pwhash):
+        self.username = username
+        self.pwhash = pwhash

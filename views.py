@@ -1,6 +1,8 @@
 from flask import request, redirect, render_template, session
+from werkzeug import generate_password_hash, check_password_hash
 from inventory_control import app
 from forms import *
+from models import *
 
 @app.route("/", methods = ["GET", "POST"])
 def index():
@@ -21,18 +23,24 @@ def login_page():
         user = User.query.filter_by(username = form.username.data).first()
         if user is None or not user.verify_pwhash(form.password.data):
             return redirect(url_for("login"))
-        login_user(user, form.remember_me.data)
-        return redirect(request.args.get("next") or url_for("search"))
+        elif check_password_hash(self.pwhash, password):
+            login_user(user, form.remember_me.data)
+            return redirect(request.args.get("next") or url_for("search"))
     return render_template("login.html", form = form)
 
 @app.route("/register", methods = ["GET", "POST"])
 def register_page():
     form = RegisterForm()
+    search_form = SearchForm()
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
-        User.register(username, password)
-        return render_template("inventory-search.html")
+        pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
+        user  = User(username, pwhash)
+        db.session.add(user)
+        db.session.commit()
+        return render_template("search.html", form = SearchForm(), title = "Search", greeting = "Search")
+    return render_template("register.html", form = form, title = "Register User", greeting = "Register User")
 
 #TODO (templates)
 @app.route("/search", methods = ["GET", "POST"])
@@ -48,7 +56,7 @@ def search():
             term = form.term.data
             items = Item.query.query.filter(Item.description.contains(term)).all()
         return render_template("results.html", items = items)
-    return render_template("search.html")
+    return render_template("search.html", form = form)
 
 #TODO (templates)
 @app.route("/new_item", methods = ["GET", "POST"])
