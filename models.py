@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 from inventory_control import db, lm
+from werkzeug import generate_password_hash
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -25,9 +26,10 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(20), index = True, unique = True)
     pwhash = db.Column(db.String(90))
     admin = db.Column(db.Integer)
-    new_user = db.Column(db.Boolean)
+    new_user = db.Column(db.Integer)
 
-    def __init__(self, username, pwhash, admin = 0, new_user = True):
+    def __init__(self, username, password, admin = 0, new_user = 1):
+        pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
         self.username = username
         self.pwhash = pwhash
         self.admin = admin

@@ -1,6 +1,6 @@
 from flask import request, redirect, render_template, session
 from werkzeug import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 from inventory_control import app, lm
 from forms import *
 from models import *
@@ -23,8 +23,25 @@ def login():
             return redirect("login")
         elif check_password_hash(pwhash, password):
             login_user(user, form.remember_me.data)
+            if int(user.new_user) == 1:
+                return redirect("change_pw")
             return redirect(request.args.get("next") or "search")
     return render_template("login.html", form = form)
+
+@app.route("/change_pw", methods = ["GET", "POST"])
+@login_required
+def change_pw():
+    form = ChangePasswordForm()
+    good = False
+    username = current_user.username
+    if form.validate_on_submit():
+        password = form.password.data
+        pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
+        user = User.query.filter_by(username = username).first()
+        user.new_user = 0
+        db.session.commit()
+        return redirect("search")
+    return render_template("change_pw.html", form = form, greeting = "Change Password", new_user = 1)
 
 @app.route("/lougout", methods = ["GET", "POST"])
 @login_required
@@ -35,6 +52,10 @@ def logout():
 @app.route("/register", methods = ["GET", "POST"])
 @login_required
 def register():
+    if current_user.new_user == 1:
+        return redirect("change_pw")
+    elif current_user.admin == 0:
+        return redirect("search")
     form = RegisterForm()
     search_form = SearchForm()
     admin = 0
@@ -43,8 +64,7 @@ def register():
         password = form.password.data
         if form.admin.data:
             admin = 1
-        pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
-        user  = User(username, pwhash, admin)
+        user  = User(username, password, admin)
         db.session.add(user)
         db.session.commit()
         return render_template("search.html", form = SearchForm(), title = "Search", greeting = "Search")
@@ -54,6 +74,8 @@ def register():
 @app.route("/search", methods = ["GET", "POST"])
 @login_required
 def search():
+    if current_user.new_user == 1:
+        return redirect("change_pw")
     form = SearchForm()
 
     if form.validate_on_submit():
@@ -71,6 +93,8 @@ def search():
 @app.route("/new_item", methods = ["GET", "POST"])
 @login_required
 def new_item():
+    if current_user.new_user == 1:
+        return redirect("change_pw")
     form = AddItemForm()
 
     if form.validate_on_submit():

@@ -16,6 +16,7 @@
         {% elif current_user.is_authenticated %}
           <li><a href = "{{ url_for("search")}}">Search</a></li>
           <li><a href = "{{ url_for("new_item")}}">Add Item</a></li>
+          <li><a href = "{{url_for("change_pw")}}">Change Password</a></li>
           <li><a href = "{{url_for("logout")}}">Logout</a></li>
         {% else %}
           <li><a href = "{{ url_for("login")}}">Login</a></li>

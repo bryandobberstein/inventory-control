@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, TextField, IntegerField, FloatField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, TextField, IntegerField, FloatField, BooleanField, SubmitField, HiddenField
 from wtforms.validators import InputRequired, Length, EqualTo
 
 class TestForm(FlaskForm):
@@ -33,3 +33,8 @@ class SearchForm(FlaskForm):
     term = StringField("Search")
     category = StringField("Category")
     submit = SubmitField("Find")
+
+class ChangePasswordForm(FlaskForm):
+    password = PasswordField("Password", validators = [InputRequired(), Length(6, 20)])
+    verify = PasswordField("Verify Password", validators = [InputRequired(), EqualTo("password")])
+    submit = SubmitField("Change Password")
