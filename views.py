@@ -1,6 +1,7 @@
 from flask import request, redirect, render_template, session
 from werkzeug import generate_password_hash, check_password_hash
-from inventory_control import app
+from flask_login import login_user, logout_user, login_required
+from inventory_control import app, lm
 from forms import *
 from models import *
 
@@ -21,14 +22,23 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username = form.username.data).first()
-        if user is None or not user.verify_pwhash(form.password.data):
-            return redirect(url_for("login"))
-        elif check_password_hash(self.pwhash, password):
+        password = form.password.data
+        pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
+        if user is None or not check_password_hash(pwhash, password):
+            return redirect("login")
+        elif check_password_hash(pwhash, password):
             login_user(user, form.remember_me.data)
-            return redirect(request.args.get("next") or url_for("search"))
+            return redirect(request.args.get("next") or "search")
     return render_template("login.html", form = form)
 
+@app.route("/lougout", methods = ["GET", "POST"])
+@login_required
+def logout():
+    logout_user()
+    return render_template("login.html", form = LoginForm())
+
 @app.route("/register", methods = ["GET", "POST"])
+@login_required
 def register():
     form = RegisterForm()
     search_form = SearchForm()
@@ -44,6 +54,7 @@ def register():
 
 #TODO (templates)
 @app.route("/search", methods = ["GET", "POST"])
+@login_required
 def search():
     form = SearchForm()
 
@@ -60,6 +71,7 @@ def search():
 
 #TODO (templates)
 @app.route("/new_item", methods = ["GET", "POST"])
+@login_required
 def new_item():
     form = AddItemForm()
 

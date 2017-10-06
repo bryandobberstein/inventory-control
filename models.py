@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from inventory_control import db
+from inventory_control import db, lm
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -24,7 +24,16 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(20), index = True, unique = True)
     pwhash = db.Column(db.String(90))
+    admin = db.Column(db.Integer)
+    new_user = db.Column(db.Boolean)
 
-    def __init__(self, username, pwhash):
+    def __init__(self, username, pwhash, admin = 0, new_user = True):
         self.username = username
         self.pwhash = pwhash
+        self.admin = admin
+        self.new_user = new_user
+
+
+@lm.user_loader
+def load_user(id):
+    return User.query.get(int(id))

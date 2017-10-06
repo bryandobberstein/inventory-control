@@ -8,10 +8,14 @@
         <a class = "navbar-brand" href = "{{ url_for("index")}}">Inventory Control</a>
       </div>
       <ul class = "nav navbar-nav">
-        <li><a href = "{{ url_for("login")}}">Login</a></li>
-        <li><a href = "{{ url_for("register")}}">Register</a></li>
-        <li><a href = "{{ url_for("search")}}">Search</a></li>
-        <li><a href = "{{ url_for("new_item")}}">Add Item</a></li>
+        {% if current_user.is_authenticated %}
+          <li><a href = "{{ url_for("register")}}">Register</a></li>
+          <li><a href = "{{ url_for("search")}}">Search</a></li>
+          <li><a href = "{{ url_for("new_item")}}">Add Item</a></li>
+          <li><a href = "{{url_for("logout")}}">Logout</a></li>
+        {% else %}
+          <li><a href = "{{ url_for("login")}}">Login</a></li>
+        {% endif %}
       </ul>
     </div>
   </nav>

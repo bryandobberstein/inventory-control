@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, login_user, logout_user, login_required
+from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
 
 app = Flask(__name__)
@@ -12,10 +12,6 @@ bootstrap = Bootstrap(app)
 from views import *
 
 lm.login_view = "login"
-
-@lm.user_loader
-def load_user(id):
-    return User.query.get(int(id))
 
 if __name__ == "__main__":
     app.run()
