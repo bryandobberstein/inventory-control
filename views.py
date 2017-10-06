@@ -7,15 +7,10 @@ from models import *
 
 @app.route("/", methods = ["GET", "POST"])
 def index():
-    form = TestForm()
-    name = ""
-    error = ""
-    greeting = "Enter Your Name"
-    if request.method == "POST":
-        if form.validate_on_submit():
-            name = form.name.data
-            greeting = "Hello, {}".format(name)
-    return render_template("index.html", form = form, greeting = greeting, title = "Inventory Control")
+    greeting = "Inventory Control System"
+    form = SearchForm()
+    lform = LoginForm()
+    return render_template("index.html", form = form, lform = lform, greeting = greeting, title = "Inventory Control")
 
 @app.route("/login", methods = ["GET", "POST"])
 def login():
@@ -35,7 +30,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return render_template("login.html", form = LoginForm())
+    return render_template("logout.html", greeting = "You are now logged out")
 
 @app.route("/register", methods = ["GET", "POST"])
 @login_required
