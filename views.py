@@ -37,11 +37,14 @@ def logout():
 def register():
     form = RegisterForm()
     search_form = SearchForm()
+    admin = 0
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
+        if form.admin.data:
+            admin = 1
         pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
-        user  = User(username, pwhash)
+        user  = User(username, pwhash, admin)
         db.session.add(user)
         db.session.commit()
         return render_template("search.html", form = SearchForm(), title = "Search", greeting = "Search")

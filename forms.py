@@ -16,6 +16,7 @@ class RegisterForm(FlaskForm):
     username = StringField("Username", validators = [InputRequired(), Length(6, 20)])
     password = PasswordField("Password", validators = [InputRequired(), Length(6, 20)])
     verify = PasswordField("Verify Password", validators = [InputRequired(), EqualTo("password")])
+    admin = BooleanField("Give User Admin Rights")
     submit = SubmitField("Register")
 
 class AddItemForm(FlaskForm):
