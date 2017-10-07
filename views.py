@@ -5,6 +5,8 @@ from inventory_control import app, lm
 from forms import *
 from models import *
 
+
+
 @app.route("/", methods = ["GET", "POST"])
 def index():
     greeting = "Inventory Control System"
@@ -70,7 +72,6 @@ def register():
         return render_template("search.html", form = SearchForm(), title = "Search", greeting = "Search")
     return render_template("register.html", form = form, title = "Register User", greeting = "Register User")
 
-#TODO (templates)
 @app.route("/search", methods = ["GET", "POST"])
 @login_required
 def search():
@@ -89,7 +90,6 @@ def search():
         return render_template("results.html", items = items)
     return render_template("search.html", form = form)
 
-#TODO (templates)
 @app.route("/new_item", methods = ["GET", "POST"])
 @login_required
 def new_item():
@@ -118,3 +118,29 @@ def new_item():
             return render_template("new_item.html", new_item_id = new_item_id)
 
     return render_template("add.html", form = form)
+
+@app.route("/update", methods = ["POST"])
+@login_required
+def update():
+    id = request.form["id"]
+    item = Item.query.filter_by(id = id).first()
+    form = UpdateItemForm()
+
+    return render_template("update.html", form = form, greeting = "Update Item", item = item)
+
+@app.route("/update_item", methods = ["POST"])
+def update_item():
+    form = UpdateItemForm()
+    if form.validate_on_submit():
+        id = form.uid.data
+        item = Item.query.filter_by(id = id).first()
+        item.title = form.title.data
+        item.author = form.author.data
+        item.description = form.description.data
+        item.isbn = form.isbn.data
+        item.price = form.price.data
+        item.in_stock = form.in_stock.data
+        item.location = form.location.data
+        db.session.commit()
+        items = Item.query.filter_by(id = id).all()
+        return render_template("results.html", items = items)

@@ -19,6 +19,12 @@
          <tr><th scope="row">Price: </th><td>{{item.price}}</td></tr>
          <tr><th scope="row">In Stock: </th><td>{{item.in_stock}}</td></tr>
          <tr><th scope="row">Location: </th><td>{{item.location | safe}}</td></tr>
+         <tr><td>
+           <form method = "post" action = "update">
+             <input type = "hidden" name = "id" value = "{{item.id}}">
+             <input type="submit" value="Update Item">
+           </form>
+         </td></tr>
        </tbody>
         {% endfor %}
     </table>

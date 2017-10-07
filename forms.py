@@ -1,10 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextField, IntegerField, FloatField, BooleanField, SubmitField, HiddenField
 from wtforms.validators import InputRequired, Length, EqualTo
-
-class TestForm(FlaskForm):
-    name = StringField("Name", validators = [InputRequired(message = "Please enter a name")])
-    submit = SubmitField("Enter")
+from models import *
 
 class LoginForm(FlaskForm):
     username = StringField("Username", validators = [InputRequired()])
@@ -38,3 +35,14 @@ class ChangePasswordForm(FlaskForm):
     password = PasswordField("Password", validators = [InputRequired(), Length(6, 20)])
     verify = PasswordField("Verify Password", validators = [InputRequired(), EqualTo("password")])
     submit = SubmitField("Change Password")
+
+class UpdateItemForm(FlaskForm):
+    uid = HiddenField()
+    title = StringField("Title", validators = [InputRequired()])
+    author = StringField("Author", validators = [InputRequired()])
+    description = TextField("Description", validators = [InputRequired()])
+    isbn = isbn = IntegerField("ISBN", validators = [InputRequired()])
+    price = FloatField("Price", validators = [InputRequired()])
+    in_stock = IntegerField("# in stock", validators = [InputRequired()])
+    location = TextField("Location", validators = [InputRequired()])
+    submit = SubmitField("Update Item")
