@@ -45,4 +45,5 @@ class UpdateItemForm(FlaskForm):
     price = FloatField("Price", validators = [InputRequired()])
     in_stock = IntegerField("# in stock", validators = [InputRequired()])
     location = TextField("Location", validators = [InputRequired()])
+    delete = BooleanField("Delete Item From Inventory")
     submit = SubmitField("Update Item")

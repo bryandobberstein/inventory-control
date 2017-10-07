@@ -87,6 +87,8 @@ def search():
         else:
             term = form.term.data
             items = Item.query.filter(Item.description.contains(term)).all()
+        if not items:
+            return render_template("results.html", greeting = term + "  not found")
         return render_template("results.html", items = items)
     return render_template("search.html", form = form)
 
@@ -106,22 +108,21 @@ def new_item():
         in_stock = form.in_stock.data
         location = form.location.data
 
-        double_check = Item.query.filter_by(isbn = isbn)
-        if double_check:
-            return render_template("add.html", error = "That item already exists")
-        else:
-            item_to_add = Item(title,author, description, isbn, price, in_stock, location)
-            db.session.add(item_to_add)
-            db.session.commit()
-            newid = item_to_add.id
-            new_item_id = Item.query.filter_by(id = id).first()
-            return render_template("new_item.html", new_item_id = new_item_id)
+
+        item_to_add = Item(title,author, description, isbn, price, in_stock, location)
+        db.session.add(item_to_add)
+        db.session.commit()
+        items = Item.query.filter_by(id = item_to_add.id).all()
+        greeting = "Item Added"
+        return render_template("results.html", items = items, greeting = greeting)
 
     return render_template("add.html", form = form)
 
 @app.route("/update", methods = ["POST"])
 @login_required
 def update():
+    if current_user.new_user == 1:
+        return redirect("change_pw")
     id = request.form["id"]
     item = Item.query.filter_by(id = id).first()
     form = UpdateItemForm()
@@ -130,17 +131,27 @@ def update():
 
 @app.route("/update_item", methods = ["POST"])
 def update_item():
+    if current_user.new_user == 1:
+        return redirect("change_pw")
     form = UpdateItemForm()
+    greeting = "Updated"
     if form.validate_on_submit():
         id = form.uid.data
         item = Item.query.filter_by(id = id).first()
-        item.title = form.title.data
-        item.author = form.author.data
-        item.description = form.description.data
-        item.isbn = form.isbn.data
-        item.price = form.price.data
-        item.in_stock = form.in_stock.data
-        item.location = form.location.data
-        db.session.commit()
-        items = Item.query.filter_by(id = id).all()
-        return render_template("results.html", items = items)
+        if form.delete.data:
+            db.session.delete(item)
+            db.session.commit()
+            return render_template("deleted.html", greeting = form.title.data + " Deleted")
+        else:
+            item.title = form.title.data
+            item.author = form.author.data
+            item.description = form.description.data
+            item.isbn = form.isbn.data
+            item.price = form.price.data
+            item.in_stock = form.in_stock.data
+            item.location = form.location.data
+            db.session.commit()
+            items = Item.query.filter_by(id = id).all()
+            return render_template("results.html", items = items, greeting = greeting)
+
+    return render_template("error.html", greeting = "Page Accessed In Error")
