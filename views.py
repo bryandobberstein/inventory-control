@@ -81,14 +81,19 @@ def delete_user():
         return redirect("search")
 
     form = DeleteUserForm()
+    users = User.query.all()
     if form.validate_on_submit():
         id = form.uid.data
         duser = User.query.filter_by(id = id).first()
-        db.session.delete(duser)
-        db.session.commit()
-        users = User.query.all()
-        return render_template("delete_user.html", form = form, users = users)
-    users = User.query.all()
+        if duser.username == "Admin":
+            error = "Admin cannot be deleted"
+            return render_template("delete_user.html", form = form, users = users, error = error)
+        else:
+            db.session.delete(duser)
+            db.session.commit()
+
+            return render_template("delete_user.html", form = form, users = users)
+
     return render_template("delete_user.html", form = form, users = users)
 
 @app.route("/search", methods = ["GET", "POST"])
