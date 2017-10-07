@@ -72,6 +72,25 @@ def register():
         return render_template("search.html", form = SearchForm(), title = "Search", greeting = "Search")
     return render_template("register.html", form = form, title = "Register User", greeting = "Register User")
 
+@app.route("/delete_user", methods = ["GET", "POST"])
+@login_required
+def delete_user():
+    if current_user.new_user == 1:
+        return redirect("change_pw")
+    elif current_user.admin == 0:
+        return redirect("search")
+
+    form = DeleteUserForm()
+    if form.validate_on_submit():
+        id = form.uid.data
+        duser = User.query.filter_by(id = id).first()
+        db.session.delete(duser)
+        db.session.commit()
+        users = User.query.all()
+        return render_template("delete_user.html", form = form, users = users)
+    users = User.query.all()
+    return render_template("delete_user.html", form = form, users = users)
+
 @app.route("/search", methods = ["GET", "POST"])
 @login_required
 def search():
@@ -80,10 +99,15 @@ def search():
     form = SearchForm()
 
     if form.validate_on_submit():
-        if form.category.data:
-            category = form.category.data
+        if form.category.data == 'title':
             term = form.term.data
-            items = Item.query.filter(Item.category.contains(term)).all()
+            items = Item.query.filter(Item.title.contains(term)).all()
+        elif form.category.data == 'author':
+            term = form.term.data
+            items = Item.query.filter(Item.author.contains(term)).all()
+        elif form.category.data == 'isbn':
+            term = form.term.data
+            items = Item.query.filter(Item.isbn.contains(term)).all()
         else:
             term = form.term.data
             items = Item.query.filter(Item.description.contains(term)).all()
@@ -130,6 +154,7 @@ def update():
     return render_template("update.html", form = form, greeting = "Update Item", item = item)
 
 @app.route("/update_item", methods = ["POST"])
+@login_required
 def update_item():
     if current_user.new_user == 1:
         return redirect("change_pw")

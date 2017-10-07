@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, TextField, IntegerField, FloatField, BooleanField, SubmitField, HiddenField
+from wtforms import StringField, PasswordField, TextField, IntegerField, FloatField, BooleanField, SubmitField, HiddenField, SelectField
 from wtforms.validators import InputRequired, Length, EqualTo
 from models import *
 
@@ -16,6 +16,10 @@ class RegisterForm(FlaskForm):
     admin = BooleanField("Give User Admin Rights")
     submit = SubmitField("Register")
 
+class DeleteUserForm(FlaskForm):
+    uid = HiddenField()
+    delete = SubmitField("Delete")
+
 class AddItemForm(FlaskForm):
     title = StringField("Title", validators = [InputRequired()])
     author = StringField("Author", validators = [InputRequired()])
@@ -28,7 +32,7 @@ class AddItemForm(FlaskForm):
 
 class SearchForm(FlaskForm):
     term = StringField("Search")
-    category = StringField("Category")
+    category = SelectField("Search In", choices = [("all", "All"), ("title", "Title"), ("author", "Author"), ("isbn", "ISBN")])
     submit = SubmitField("Find")
 
 class ChangePasswordForm(FlaskForm):

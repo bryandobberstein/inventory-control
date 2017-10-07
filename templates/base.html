@@ -10,6 +10,7 @@
       <ul class = "nav navbar-nav">
         {% if current_user.admin %}
           <li><a href = "{{ url_for("register")}}">Register</a></li>
+          <li><a href = "{{ url_for("delete_user")}}">Delete User</a></li>
           <li><a href = "{{ url_for("search")}}">Search</a></li>
           <li><a href = "{{ url_for("new_item")}}">Add Item</a></li>
           <li><a href = "{{url_for("logout")}}">Logout</a></li>
