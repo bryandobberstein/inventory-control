@@ -3,7 +3,9 @@
 {% block  content %}
   <div class = "container">
     <h1>{{ greeting }}</h1>
-    <h1 class = "error"> {{ error}}</h1>
+    <div class = "alert alert-danger" role = "alert">
+        <h1> {{ error}}</h1>
+    </div>
     {{ wtf.quick_form(form) }}
   </div>
 {% endblock %}
