@@ -69,8 +69,8 @@ def register():
         user  = User(username, password, admin)
         db.session.add(user)
         db.session.commit()
-        return render_template("search.html", form = SearchForm(), title = "Search", greeting = "Search", title = Search)
-    return render_template("register.html", form = form, title = "Register User", greeting = "Register User", title = "Register User")
+        return render_template("search.html", form = SearchForm(), title = "Search", greeting = "Search")
+    return render_template("register.html", form = form, title = "Register User")
 
 @app.route("/delete_user", methods = ["GET", "POST"])
 @login_required
@@ -119,7 +119,7 @@ def search():
         if not items:
             return render_template("results.html", greeting = term + "  not found", title = "Results")
         return render_template("results.html", items = items, title = "Results")
-    return render_template("search.html", form = form, title = "Results")
+    return render_template("search.html", form = form, title = "Search")
 
 @app.route("/new_item", methods = ["GET", "POST"])
 @login_required
