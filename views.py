@@ -28,6 +28,8 @@ def login():
             if int(user.new_user) == 1:
                 return redirect("change_pw")
             return redirect(request.args.get("next") or "search")
+    else:
+        return render_template("login.html", form = form, title = "Login", error = "Wrong Username or Password")
     return render_template("login.html", form = form, title = "Login")
 
 @app.route("/change_pw", methods = ["GET", "POST"])
