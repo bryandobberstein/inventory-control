@@ -22,14 +22,12 @@ def login():
         password = form.password.data
         pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
         if user is None or not check_password_hash(pwhash, password):
-            return redirect("login")
+            return render_template("login.html", form = form, title = "Login", error = "Wrong username or password")
         elif check_password_hash(pwhash, password):
             login_user(user, form.remember_me.data)
             if int(user.new_user) == 1:
                 return redirect("change_pw")
             return redirect(request.args.get("next") or "search")
-    else:
-        return render_template("login.html", form = form, title = "Login", error = "Wrong Username or Password")
     return render_template("login.html", form = form, title = "Login")
 
 @app.route("/change_pw", methods = ["GET", "POST"])
