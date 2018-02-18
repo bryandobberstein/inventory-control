@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 
 {% block  content %}
-  <div class = "alert alert-danger" role = "alert">
-    <h1>{{ error }}</h1>
-  </div>
+    {% if error %}
+      <div class = "alert alert-danger" role = "alert">
+        <h1>{{ error }}</h1>
+      </div>
+    {% endif %}
   {% for user in users %}
     <div class = "container">
       <h1>{{ greeting }}</h1>

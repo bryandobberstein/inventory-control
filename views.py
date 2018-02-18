@@ -1,5 +1,5 @@
 from flask import request, redirect, render_template, session
-from werkzeug import generate_password_hash, check_password_hash
+from flask_bcrypt import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from inventory_control import app, lm
 from forms import *
@@ -20,10 +20,9 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username = form.username.data).first()
         password = form.password.data
-        pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
-        if user is None or not check_password_hash(pwhash, password):
+        if user is None or not check_password_hash(user.pwhash, password):
             return redirect("login")
-        elif check_password_hash(pwhash, password):
+        elif check_password_hash(user.pwhash, password):
             login_user(user, form.remember_me.data)
             if int(user.new_user) == 1:
                 return redirect("change_pw")
@@ -38,7 +37,7 @@ def change_pw():
     username = current_user.username
     if form.validate_on_submit():
         password = form.password.data
-        pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
+        pwhash = generate_password_hash(password)
         user = User.query.filter_by(username = username).first()
         user.new_user = 0
         db.session.commit()
