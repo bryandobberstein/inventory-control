@@ -1,7 +1,7 @@
 from flask import request, redirect, render_template, session
-from flask_bcrypt import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from inventory_control import app, lm
+from password_tools import hashpw, checkpw
 from forms import *
 from models import *
 
@@ -21,6 +21,7 @@ def login():
         user = User.query.filter_by(username = form.username.data).first()
         password = form.password.data
 <<<<<<< HEAD
+<<<<<<< HEAD
         pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
         if user is None or not check_password_hash(pwhash, password):
             return render_template("login.html", form = form, title = "Login", error = "Wrong username or password")
@@ -29,6 +30,11 @@ def login():
         if user is None or not check_password_hash(user.pwhash, password):
             return redirect("login")
         elif check_password_hash(user.pwhash, password):
+>>>>>>> working
+=======
+        if user is None or not checkpw(user.pwhash, password):
+            return redirect("login")
+        elif checkpw(user.pwhash, password):
 >>>>>>> working
             login_user(user, form.remember_me.data)
             if int(user.new_user) == 1:
@@ -44,14 +50,14 @@ def change_pw():
     username = current_user.username
     if form.validate_on_submit():
         password = form.password.data
-        pwhash = generate_password_hash(password)
+        pwhash = hashpw(password)
         user = User.query.filter_by(username = username).first()
         user.new_user = 0
         db.session.commit()
         return redirect("search")
     return render_template("change_pw.html", form = form, greeting = "Change Password", new_user = 1, title = "Change Password")
 
-@app.route("/lougout", methods = ["GET", "POST"])
+@app.route("/logout", methods = ["GET", "POST"])
 @login_required
 def logout():
     logout_user()

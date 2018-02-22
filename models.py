@@ -1,6 +1,6 @@
 from flask_login import UserMixin
 from inventory_control import db, lm
-from flask_bcrypt import generate_password_hash
+from password_tools import hashpw
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -29,7 +29,7 @@ class User(UserMixin, db.Model):
     new_user = db.Column(db.Integer)
 
     def __init__(self, username, password, admin = 0, new_user = 1):
-        pwhash = generate_password_hash(password).decode('utf-8')
+        pwhash = hashpw(password)
         self.username = username
         self.pwhash = pwhash
         self.admin = admin
