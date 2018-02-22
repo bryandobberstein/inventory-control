@@ -20,22 +20,9 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username = form.username.data).first()
         password = form.password.data
-<<<<<<< HEAD
-<<<<<<< HEAD
-        pwhash = generate_password_hash(password, method="sha256", salt_length = 12)
-        if user is None or not check_password_hash(pwhash, password):
-            return render_template("login.html", form = form, title = "Login", error = "Wrong username or password")
-        elif check_password_hash(pwhash, password):
-=======
-        if user is None or not check_password_hash(user.pwhash, password):
-            return redirect("login")
-        elif check_password_hash(user.pwhash, password):
->>>>>>> working
-=======
         if user is None or not checkpw(user.pwhash, password):
             return redirect("login")
         elif checkpw(user.pwhash, password):
->>>>>>> working
             login_user(user, form.remember_me.data)
             if int(user.new_user) == 1:
                 return redirect("change_pw")
