@@ -27,7 +27,7 @@ def login():
             if int(user.new_user) == 1:
                 return redirect("change_pw")
             return redirect(request.args.get("next") or "search")
-    return render_template("login.html", form = form, title = "Login")
+    return render_template("login.html", form = form)
 
 @app.route("/change_pw", methods = ["GET", "POST"])
 @login_required
@@ -42,13 +42,13 @@ def change_pw():
         user.new_user = 0
         db.session.commit()
         return redirect("search")
-    return render_template("change_pw.html", form = form, greeting = "Change Password", new_user = 1, title = "Change Password")
+    return render_template("change_pw.html", form = form, greeting = "Change Password", new_user = 1)
 
 @app.route("/logout", methods = ["GET", "POST"])
 @login_required
 def logout():
     logout_user()
-    return render_template("logout.html", greeting = "You are now logged out", title = "Logged Out")
+    return render_template("logout.html", greeting = "You are now logged out")
 
 @app.route("/register", methods = ["GET", "POST"])
 @login_required
@@ -69,7 +69,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         return render_template("search.html", form = SearchForm(), title = "Search", greeting = "Search")
-    return render_template("register.html", form = form, title = "Register User")
+    return render_template("register.html", form = form, title = "Register User", greeting = "Register User")
 
 @app.route("/delete_user", methods = ["GET", "POST"])
 @login_required
@@ -86,14 +86,14 @@ def delete_user():
         duser = User.query.filter_by(id = id).first()
         if duser.username == "Admin":
             error = "Admin cannot be deleted"
-            return render_template("delete_user.html", form = form, users = users, error = error, title = "Delete User")
+            return render_template("delete_user.html", form = form, users = users, error = error)
         else:
             db.session.delete(duser)
             db.session.commit()
 
-            return render_template("delete_user.html", form = form, users = users, title = "Delete User")
+            return render_template("delete_user.html", form = form, users = users)
 
-    return render_template("delete_user.html", form = form, users = users, title = "Delete User")
+    return render_template("delete_user.html", form = form, users = users)
 
 @app.route("/search", methods = ["GET", "POST"])
 @login_required
@@ -116,9 +116,9 @@ def search():
             term = form.term.data
             items = Item.query.filter(Item.description.contains(term)).all()
         if not items:
-            return render_template("results.html", greeting = term + "  not found", title = "Results")
-        return render_template("results.html", items = items, title = "Results")
-    return render_template("search.html", form = form, title = "Search")
+            return render_template("results.html", greeting = term + "  not found")
+        return render_template("results.html", items = items)
+    return render_template("search.html", form = form)
 
 @app.route("/new_item", methods = ["GET", "POST"])
 @login_required
@@ -142,9 +142,9 @@ def new_item():
         db.session.commit()
         items = Item.query.filter_by(id = item_to_add.id).all()
         greeting = "Item Added"
-        return render_template("results.html", items = items, greeting = greeting, title = "Item Added")
+        return render_template("results.html", items = items, greeting = greeting)
 
-    return render_template("add.html", form = form, title = "Add Item")
+    return render_template("add.html", form = form)
 
 @app.route("/update", methods = ["POST"])
 @login_required
@@ -155,7 +155,7 @@ def update():
     item = Item.query.filter_by(id = id).first()
     form = UpdateItemForm()
 
-    return render_template("update.html", form = form, greeting = "Update Item", item = item, title = "Update Item")
+    return render_template("update.html", form = form, greeting = "Update Item", item = item)
 
 @app.route("/update_item", methods = ["POST"])
 @login_required
@@ -170,7 +170,7 @@ def update_item():
         if form.delete.data:
             db.session.delete(item)
             db.session.commit()
-            return render_template("deleted.html", greeting = form.title.data + " Deleted", title = "Item Deleted")
+            return render_template("deleted.html", greeting = form.title.data + " Deleted")
         else:
             item.title = form.title.data
             item.author = form.author.data
@@ -181,6 +181,6 @@ def update_item():
             item.location = form.location.data
             db.session.commit()
             items = Item.query.filter_by(id = id).all()
-            return render_template("results.html", items = items, greeting = greeting, title = "Item Updated")
+            return render_template("results.html", items = items, greeting = greeting)
 
-    return render_template("error.html", greeting = "Page Accessed In Error", title = "Error")
+    return render_template("error.html", greeting = "Page Accessed In Error")
