@@ -96,9 +96,11 @@ ENV/
 
 # mkdocs documentation
 /site
+/database
 
 # mypy
 .mypy_cache/
 
 # stuff for me
 *.note
+*.db
